@@ -4,6 +4,7 @@ import * as BooksAPI from './BooksAPI'
 class Search extends Component {
     state = {
         query: '',
+        allBooks: '',
         filteredBooks: '',
     }
 
@@ -17,24 +18,34 @@ class Search extends Component {
         this.setState({ query: input })
     }
 
-    // componentDidMount() {
-    //     BooksAPI.search()
-    //       .then((books) => {
-    //         console.log("filtered books", books)
-    //         this.setState(() => ({
-    //             filteredBooks: books
-    //         }))
-    //       })
-    //   }
+    componentDidMount() {
+        // BooksAPI.search()
+        //   .then((books) => {
+        //     console.log("filtered books", books)
+        //     this.setState(() => ({
+        //         filteredBooks: books
+        //     }))
+        //   })
+        //const { combinedObj }= this.props.location.state
+        //console.log("here now", combinedObj)
+    }
+
+    changeToMainPage(ev) {
+        // console.log("button clicked", ev)
+        this.props.changeToMainPage(ev)
+    }
+
+
 
 
     render() {
-
+        // const { allBooks } = this.props;
+        // console.log("all books", allBooks())
         return (
             <div className="search-books">
                 <p>query {this.state.query}</p>
                 <div className="search-books-bar">
-                    {/* <button className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</button> */}
+                    <button className="close-search" onClick={(ev) => this.changeToMainPage(ev)}>Close</button>
                     <div className="search-books-input-wrapper">
                         {/*
                         NOTES: The search from BooksAPI is limited to a particular set of search terms.
