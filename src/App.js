@@ -14,22 +14,18 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-    //showSearchPage: false,
     books: [],
-    // category: '',
     read: [],
     wantToRead: [],
     currentlyReading: [],
     none: [],
     shelfs: ["read", "wantToRead", "currentlyReading"],
-    //newShelves: {}
-    //combineAllShelfs: null,
   }
 
   componentDidMount() {
     BooksAPI.getAll()
       .then((books) => {
-        //console.log(books)
+        console.log("books", books)
         let currentlyReading = books.filter(book => book.shelf === "currentlyReading").map(book => book)
         let read = books.filter(book => book.shelf === "read").map(book => book)
         let wantToRead = books.filter(book => book.shelf === "wantToRead").map(book => book)
@@ -43,14 +39,33 @@ class BooksApp extends React.Component {
       })
   }
 
-  handleChangeShelf = (bookID, newShelf, currentShelf) => {
-    console.log("bookid", bookID, "newShelf", newShelf, "currentshelf", currentShelf)
-    let cShelf = this.state[currentShelf]
-    let nShelf = this.state[newShelf]
+  updateBooks = (book, shelf) => {
+    BooksAPI.update(book, shelf)
+      .then((books) => {
+        //console.log("updated books", books)
+        let stateShelf = this.state[shelf]
+        let newShelves = {}
+        newShelves[stateShelf] = [books]
+        console.log("new Shelves", newShelves)
+        this.setState(newShelves)
+      })
+  }
 
+  handleChangeShelf = (bookID, newShelf, currentShelf, book) => {
+    console.log("bookid in APP", bookID, "newShelf in APP", newShelf, "currentshelf in APP", currentShelf, "whole book obj", book)
+    this.updateBooks(book, newShelf)
+
+    let cShelf = this.state[currentShelf]
+    if(!cShelf) {
+      cShelf = this.state[newShelf]
+    }
+    let nShelf = this.state[newShelf]
 
     if(cShelf !== nShelf) {
       let book = this.state.books.filter(book => book.id === bookID)[0]
+      book.shelf = newShelf
+
+      //book.shelf = newShelf
       cShelf = cShelf.filter(book => book.id !== bookID)
       if(!nShelf) {
         let none = this.state.none
@@ -64,50 +79,7 @@ class BooksApp extends React.Component {
     newShelves[currentShelf] = [...cShelf]
     newShelves[newShelf] = [...nShelf]
 
-    console.log("------------------------")
-    console.log("newShelf: ", newShelf, "currentShelf: ", currentShelf, "newShelves: ", newShelves)
-    console.log("------------------------")
     this.setState(newShelves)
-    currentShelf = this.state[newShelf].map(book => book.shelf = newShelf)[0]
-    console.log("_____________")
-    console.log("new current shelf", currentShelf)
-
-    // if(currentShelf !== newShelf) {
-    //   let removeFromShelf = currShelf.filter(book => book.id !== bookID)
-    //   let removedBook = []
-    //   for(let book of currShelf) {
-    //     if(book.id === bookID) {
-    //       removedBook.push(book)
-    //     }
-    //   }
-    //   let obj  = {}
-    //   obj[currentShelf] = removeFromShelf
-    //   this.setState(obj)
-    //   let obj2 = {}
-    //   let temp = [...newS]
-    //   for(let book of removedBook) {
-    //     temp.push(book)
-    //   }
-    //   console.log("new S", temp)
-    //   obj2[newShelf] = temp
-    //   this.setState(obj2)
-    // }
-  }
-
-  combineAllShelfs = () => {
-    let combinedObj = {}
-    let read = this.state.read;
-    let wantToRead = this.state.wantToRead;
-    let currentlyReading = this.state.currentlyReading;
-    let none = this.state.none;
-
-    combinedObj["read"] = read;
-    combinedObj["wantToRead"] = wantToRead;
-    combinedObj["currentlyReading"] = currentlyReading;
-    combinedObj["none"] = none;
-    //console.log("combined shelfs", combinedObj)
-    this.setState({ combinedObj })
-    //return combinedObj;
   }
 
   render() {
@@ -128,23 +100,15 @@ class BooksApp extends React.Component {
                 />
               )
             }
+            <Link to='/search' className="open-search">
+              <button type="button">Add a book</button>
+            </Link>
           </div>
         )} />
-        {/* <Link to='/search' className="open-search">
-          <button type="button">Add a book</button>
-        </Link> */}
-        <Link to={{
-            pathname: '/search',
-            state: { combinedObj: "abc" }
-          }}
-          className="open-search"><button type="button">Add a book</button>
-        </Link>
         <Route exact path='/search' render={({history}) => (
           <Search
-            changeToMainPage={() => {
-              history.push('/')
-            }}
-            combineAllShelfs={() => {this.combineAllShelfs()}}
+            changeToMainPage={() => {history.push('/'); window.location.reload()}}
+            handleChangeShelf={this.handleChangeShelf.bind(this)}
           />
         )} />
       </div>
