@@ -15,9 +15,11 @@ class Shelf extends Component {
 
     render() {
         const { name, books } = this.props
+
         return (
             <div className="list-shelves">
                 <div className="list-books-content">
+                    <h1 className="bookshelf-name">{ name }</h1>
                     <div>
                         <div className="bookshelf">
                         {/* <h2 className="bookshelf-title">Currently Reading</h2>
@@ -43,10 +45,10 @@ class Shelf extends Component {
                             </li>
                             </ol>
                         </div> */}
-                        <h1>{ name }</h1>
-                        <ol>{ books.map((book) => <Book key={book.id} book={book} handleChangeShelf={this.handleChangeShelf.bind(this)}/>)}</ol>
+                        {/* <h1 class="bookshelf-name">{ name }</h1> */}
+                            <ol className="list-shelves">{ books.map((book) => <Book key={book.id} book={book} handleChangeShelf={this.handleChangeShelf.bind(this)}/>)}</ol>
+                        </div>
                     </div>
-                </div>
                 </div>
           </div>
         )
