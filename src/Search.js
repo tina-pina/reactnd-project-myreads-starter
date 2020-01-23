@@ -1,49 +1,60 @@
 import React, { Component } from 'react';
-import * as BooksAPI from './BooksAPI'
+import * as BooksAPI from './BooksAPI';
+import Book from './Book';
 
 class Search extends Component {
     state = {
         query: '',
-        allBooks: '',
-        filteredBooks: '',
+        filteredBooks: [],
     }
 
-    // updateQuery = (query) => {
-    //     this.setState(() => ({
-    //         query: query
-    //     }))
-    // }
-    handleQuery(input) {
-        // console.log("....", input)
-        this.setState({ query: input })
+    updateQuery = (query) => {
+        this.setState(() => ({
+            query: query
+        }))
     }
 
-    componentDidMount() {
-        // BooksAPI.search()
-        //   .then((books) => {
-        //     console.log("filtered books", books)
-        //     this.setState(() => ({
-        //         filteredBooks: books
-        //     }))
-        //   })
-        //const { combinedObj }= this.props.location.state
-        //console.log("here now", combinedObj)
+    clearQuery = () => {
+        this.updateQuery('')
+    }
+
+    handleQuery = (input) => {
+        console.log("input", input)
+        this.setState({
+            query: input
+        }, () => {
+            if (this.state.query && this.state.query.length > 1) {
+                this.getInfo()
+            }
+            this.clearQuery()
+        })
+    }
+
+    getInfo = () => {
+        let searchTerm = this.state.query
+        //console.log("term searched", searchTerm)
+        BooksAPI.search(searchTerm)
+          .then((books) => {
+            console.log("filtered books", books)
+            this.setState(() => ({
+                filteredBooks: books
+            }))
+          })
     }
 
     changeToMainPage(ev) {
-        // console.log("button clicked", ev)
         this.props.changeToMainPage(ev)
     }
 
-
-
+    handleChangeShelf = (bookID, newShelf, bookShelf, book) =>  {
+        console.log("finally works")
+        console.log(bookID, newShelf, bookShelf=undefined, book)
+        this.props.handleChangeShelf(bookID, newShelf, bookShelf=undefined, book)
+    }
 
     render() {
-        // const { allBooks } = this.props;
-        // console.log("all books", allBooks())
         return (
             <div className="search-books">
-                <p>query {this.state.query}</p>
                 <div className="search-books-bar">
                     <button className="close-search" onClick={(ev) => this.changeToMainPage(ev)}>Close</button>
                     <div className="search-books-input-wrapper">
@@ -59,7 +70,9 @@ class Search extends Component {
                     </div>
                 </div>
                 <div className="search-books-results">
-                    <ol className="books-grid"></ol>
+                    <ol className="books-grid">
+                        {this.state.filteredBooks.length > 0? this.state.filteredBooks.map(book => <Book key={book.id} book={book} handleChangeShelf={this.handleChangeShelf.bind(this)}/>): ''}
+                    </ol>
                 </div>
           </div>
         )
