@@ -6,6 +6,8 @@ class Search extends Component {
     state = {
         query: '',
         filteredBooks: [],
+        search: false,
+        noResults: false,
     }
 
     updateQuery = (query) => {
@@ -19,40 +21,52 @@ class Search extends Component {
     }
 
     handleQuery = (input) => {
-        console.log("input", input)
         this.setState({
-            query: input
+            query: input,
+            search: true,
         }, () => {
             if (this.state.query && this.state.query.length > 1) {
                 this.getInfo()
             }
-            this.clearQuery()
+            else if(this.state.query.length === 0) {
+                this.setState(() => ({
+                    filteredBooks: []
+                }))
+                this.clearQuery()
+                window.location.reload(false)
+            }
         })
     }
 
     getInfo = () => {
         let searchTerm = this.state.query
-        //console.log("term searched", searchTerm)
-        BooksAPI.search(searchTerm)
+
+        return BooksAPI.search(searchTerm)
           .then((books) => {
-            console.log("filtered books", books)
+            if(books.error === 'empty query') {
+                this.setState(() => ({
+                    noResults: true
+                }))
+                this.clearQuery()
+            }
             this.setState(() => ({
                 filteredBooks: books
             }))
           })
+          .catch(err => {console.log(err.error)})
     }
 
-    changeToMainPage(ev) {
+    changeToMainPage = (ev) => {
         this.props.changeToMainPage(ev)
     }
 
-    handleChangeShelf = (bookID, newShelf, bookShelf, book) =>  {
-        console.log("finally works")
-        console.log(bookID, newShelf, bookShelf=undefined, book)
-        this.props.handleChangeShelf(bookID, newShelf, bookShelf=undefined, book)
+    handleChangeShelf = (book, newShelf) =>  {
+        this.props.handleChangeShelf(book, newShelf)
     }
 
     render() {
+        const { books } = this.props;
+
         return (
             <div className="search-books">
                 <div className="search-books-bar">
@@ -70,8 +84,11 @@ class Search extends Component {
                     </div>
                 </div>
                 <div className="search-books-results">
+                    <div>{this.state.filteredBooks.length === 0 && this.state.search === true ? <p>loading...</p>: ''}</div>
+                    <p>{this.state.search}</p>
+                    <div>{this.state.noResults === true && !this.state.filteredBooks.length ? <p>please try again...</p>: ''}</div>
                     <ol className="books-grid">
-                        {this.state.filteredBooks.length > 0? this.state.filteredBooks.map(book => <Book key={book.id} book={book} handleChangeShelf={this.handleChangeShelf.bind(this)}/>): ''}
+                        {this.state.filteredBooks.length > 0? this.state.filteredBooks.map(book => <Book key={book.id} allBooks={books} book={book} handleChangeShelf={this.handleChangeShelf.bind(this)}/>): ''}
                     </ol>
                 </div>
           </div>
