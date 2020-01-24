@@ -23,9 +23,9 @@ class BooksApp extends React.Component {
   }
 
   componentDidMount() {
-    BooksAPI.getAll()
+    return BooksAPI.getAll()
       .then((books) => {
-        console.log("books", books)
+        //console.log("books", books)
         let currentlyReading = books.filter(book => book.shelf === "currentlyReading").map(book => book)
         let read = books.filter(book => book.shelf === "read").map(book => book)
         let wantToRead = books.filter(book => book.shelf === "wantToRead").map(book => book)
@@ -37,49 +37,26 @@ class BooksApp extends React.Component {
           wantToRead: wantToRead,
         }))
       })
+      .catch(err => {console.log(err.error)})
   }
 
   updateBooks = (book, shelf) => {
-    BooksAPI.update(book, shelf)
+    return BooksAPI.update(book, shelf)
       .then((books) => {
         //console.log("updated books", books)
         let stateShelf = this.state[shelf]
         let newShelves = {}
         newShelves[stateShelf] = [books]
-        console.log("new Shelves", newShelves)
         this.setState(newShelves)
       })
+      .then(() => {window.location = '/'})
+      .catch(err => {console.log(err.error)})
   }
 
-  handleChangeShelf = (bookID, newShelf, currentShelf, book) => {
-    console.log("bookid in APP", bookID, "newShelf in APP", newShelf, "currentshelf in APP", currentShelf, "whole book obj", book)
-    this.updateBooks(book, newShelf)
-
-    let cShelf = this.state[currentShelf]
-    if(!cShelf) {
-      cShelf = this.state[newShelf]
+  handleChangeShelf = (book, newShelf) => {
+    if(book) {
+      this.updateBooks(book, newShelf)
     }
-    let nShelf = this.state[newShelf]
-
-    if(cShelf !== nShelf) {
-      let book = this.state.books.filter(book => book.id === bookID)[0]
-      book.shelf = newShelf
-
-      //book.shelf = newShelf
-      cShelf = cShelf.filter(book => book.id !== bookID)
-      if(!nShelf) {
-        let none = this.state.none
-        none.push(book)
-        this.setState({none: none})
-      }
-      nShelf.push(book)
-    }
-
-    let newShelves = {}
-    newShelves[currentShelf] = [...cShelf]
-    newShelves[newShelf] = [...nShelf]
-
-    this.setState(newShelves)
   }
 
   render() {
@@ -109,6 +86,7 @@ class BooksApp extends React.Component {
           <Search
             changeToMainPage={() => {history.push('/'); window.location.reload()}}
             handleChangeShelf={this.handleChangeShelf.bind(this)}
+            books={this.state.books}
           />
         )} />
       </div>
