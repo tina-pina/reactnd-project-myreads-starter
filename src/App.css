@@ -44,7 +44,10 @@ body, .app {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+}
+
+.shelf {
+  margin: 0 20px;
 }
 
 @media (min-width: 600px) {
