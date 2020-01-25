@@ -25,7 +25,7 @@ class BooksApp extends React.Component {
   componentDidMount() {
     return BooksAPI.getAll()
       .then((books) => {
-        //console.log("books", books)
+
         let currentlyReading = books.filter(book => book.shelf === "currentlyReading").map(book => book)
         let read = books.filter(book => book.shelf === "read").map(book => book)
         let wantToRead = books.filter(book => book.shelf === "wantToRead").map(book => book)
@@ -42,21 +42,12 @@ class BooksApp extends React.Component {
 
   updateBooks = (book, shelf) => {
     return BooksAPI.update(book, shelf)
-      .then((books) => {
-        //console.log("updated books", books)
-        let stateShelf = this.state[shelf]
-        let newShelves = {}
-        newShelves[stateShelf] = [books]
-        this.setState(newShelves)
-      })
       .then(() => {window.location = '/'})
       .catch(err => {console.log(err.error)})
   }
 
   handleChangeShelf = (book, newShelf) => {
-    if(book) {
-      this.updateBooks(book, newShelf)
-    }
+    this.updateBooks(book, newShelf)
   }
 
   render() {
